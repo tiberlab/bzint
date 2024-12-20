@@ -1,0 +1,183 @@
+!
+! This file is part of bzint.
+!
+! bzint is free software: you can redistribute it and/or modify
+! it under the terms of the GNU Lesser General Public License as
+! published by the Free Software Foundation, either version 3 of
+! the License, or (at your option) any later version.
+!
+! bzint is distributed in the hope that it will be useful,
+! but WITHOUT ANY WARRANTY; without even the implied warranty of
+! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+! GNU Lesser General Public License for more details.
+!
+! You should have received a copy of the GNU Lesser General
+! Public License along with bzint. If not, see
+! <https://www.gnu.org/licenses/>.
+!
+PROGRAM test
+  USE simplex2D
+  USE geometry
+  
+  IMPLICIT none
+
+  ! test 2D BZ integration on a square domain
+
+  ! the square:
+  type(point) :: p1, p2, p3, p4
+
+  ! the triangulation
+  type(triangle), dimension(8) :: t
+
+  ! a midpoint
+  type(point) :: mp
+
+  ! the number of energy values
+  integer, parameter :: N = 1
+
+  ! the number of bands
+  integer, parameter :: NB = 1
+
+  ! the energies we are interested in
+  double precision, dimension(N) :: erg
+
+  ! the energy dispersion values on a triangle
+  double precision, dimension(6,NB) :: edisp
+
+  ! the integral
+  double precision, dimension(N) :: res, tmpres
+  
+  integer :: i, disptype
+
+  integer :: inttype
+
+  interface
+    function dispersion(p, m)
+      use simplex2D
+      use geometry
+      implicit none
+      type(point), intent(in) :: p
+      integer, intent(in)     :: m
+      double precision, dimension(1) :: dispersion
+    end function dispersion
+  end interface
+
+
+
+  print *,''
+  print *,'Test of 2D integration for ELLIPSE'
+  print *,'=================================='
+  print *,''
+  inttype = THETA
+  disptype = 0
+
+  ! define the square
+  p1 = point(0.0D0, 0.0D0)
+  p2 = point(1.0D0, 0.0D0)
+  p3 = point(1.0D0, 1.0D0)
+  p4 = point(0.0D0, 1.0D0)
+
+  ! the energy values
+  erg = (/ 1.0D0 /)
+
+
+  ! triangulate
+  ! 1. triangle, A = 4
+  t(1)%p(1) = point(0.0D0,2.0D0)
+  t(1)%p(2) = point(0.0D0,-2.0D0)
+  t(1)%p(3) = point(2.0D0,0.0D0)
+  ! 2. triangle, A = 0.25
+  t(2)%p(1) = point(0.0D0,0.0D0)
+  t(2)%p(2) = point(-0.5D0,0.5D0)
+  t(2)%p(3) = point(-0.5D0,-0.5D0)
+  ! 3. triangle, A = 2
+  t(3)%p(1) = point(0.0D0,0.0D0)
+  t(3)%p(2) = point(2.0D0,0.0D0)
+  t(3)%p(3) = point(0.0D0,2.0D0)
+  ! 4. triangle, A = 16
+  t(4)%p(1) = point(2.0D0,0.0D0)
+  t(4)%p(2) = point(-2.0D0,4.0D0)
+  t(4)%p(3) = point(-2.0D0,-4.0D0)
+  ! 5. triangle, A = 1
+  t(5)%p(1) = point(-0.5D0,0.0D0)
+  t(5)%p(2) = point(0.0D0,-2.0D0)
+  t(5)%p(3) = point(0.5D0,0.0D0)
+  ! 6. triangle, A = 0.405
+  t(6)%p(1) = point(0.0D0,0.0D0)
+  t(6)%p(2) = point(0.9D0,-0.9D0)
+  t(6)%p(3) = point(0.9D0,0.9D0)
+  ! 7. triangle
+  t(7)%p(1) = point(0.0D0,0.0D0)
+  t(7)%p(2) = point(-1.0D0,0.0D0)
+  t(7)%p(3) = point(0.0D0,-1.0D0)
+  ! 8. triangle
+  t(8)%p(1) = point(-1.0D0,-1.0D0)
+  t(8)%p(2) = point(0.0D0,-1.0D0)
+  t(8)%p(3) = point(-1.0D0,0.0D0)
+
+  res = 0.0D0
+  do i=5,6
+     edisp(1,:) = dispersion(t(i)%p(1), disptype)
+     edisp(2,:) = dispersion(t(i)%p(2), disptype)
+     edisp(3,:) = dispersion(t(i)%p(3), disptype)
+
+     mp%x = (t(i)%p(1)%x + t(i)%p(2)%x)/2.0D0
+     mp%y = (t(i)%p(1)%y + t(i)%p(2)%y)/2.0D0
+     edisp(4,:) = dispersion(mp, disptype)
+     mp%x = (t(i)%p(2)%x + t(i)%p(3)%x)/2.0D0
+     mp%y = (t(i)%p(2)%y + t(i)%p(3)%y)/2.0D0
+     edisp(5,:) = dispersion(mp, disptype)
+     mp%x = (t(i)%p(3)%x + t(i)%p(1)%x)/2.0D0
+     mp%y = (t(i)%p(3)%y + t(i)%p(1)%y)/2.0D0
+     edisp(6,:) = dispersion(mp, disptype)
+     
+     print *,''
+     print *,'TRIANGLE',i
+     tmpres = simplex2Dqint(erg, t(i), edisp, inttype)
+     print *,'Int on triangle',i,':',tmpres
+  end do
+
+
+END PROGRAM test
+
+
+
+! defines our energy dispersion
+function dispersion(p,m)
+  use simplex2D
+  use geometry
+
+  implicit none
+
+  type(point), intent(in) :: p
+  integer, intent(in) :: m
+  double precision, dimension(1) :: dispersion
+
+  ! the expansion coefficients
+  double precision :: q1, q2, q3, q4, q5, q6
+
+  select case(m)
+  case (0)
+    q1 = 0.0D0
+    q2 = 0.0D0
+    q3 = 0.0D0
+    q4 = 1.0D0
+    q5 = 0.0D0
+    q6 = 1.0D0
+  case (1)
+    q1 = 2.0D0
+    q2 = 0.0D0
+    q3 = 0.0D0
+    q4 = -1.0D0
+    q5 = 0.0D0
+    q6 = -1.0D0
+  end select
+
+  dispersion(1) = q1 + q2*p%x + q3*p%y + &
+               q4*(p%x**2) + q5*p%x*p%y + q6*(p%y**2)
+!  dispersion(2) = dispersion(1) + 0.5
+
+end function dispersion
+
+
+

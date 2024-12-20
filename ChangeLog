@@ -1,0 +1,34 @@
+2005-01-11	M. Auf der Maur <auf.der.maur@ing.uniroma2.it>
+	*	version increase to 1.1
+	*	prepare inclusion of step-function
+	*	simplex2D.f90: exported qcurve, ltrafo to own modules
+	*	lintrafo.f90: new module for linear transformations
+	*	qsurface.f90: new module for quadratic curves
+
+2005-01-07	M. Auf der Maur <auf.der.maur@ing.uniroma2.it>
+	*	simplex2D.f90: corrected error in calculation of weights,
+			matrix F has to be transposed
+
+2004-12-07	M. Auf der Maur <auf.der.maur@ing.uniroma2.it>
+	*	hyperbolic case works
+	*	simplex2D.f90: implemented gen_qint
+	*	simplex2D.f90: point, triangle, is_inside, qroots, trroots
+			moved to other modules
+	*	geometry.f90: contains point, triangle, is_inside
+	*	realroots.f90: contains qroots, trroots
+
+2004-12-06	M. Auf der Maur <auf.der.maur@ing.uniroma2.it>
+	*	elliptic case works (matrix inversion was faulty)
+	*	parabola works
+	*	degenerate case (two lines) works
+	*	simplex2D.f90: definition of EPS moved to functions and
+			changed to 1D-12
+	*	simplex2D.f90: qroots, determine_curve_type work now on
+			scaled coefficients
+
+2004-12-02	M. Auf der Maur <auf.der.maur@ing.uniroma2.it>
+	*	linear case works
+	*	elliptic case works for some cases
+	*	simplex2D.f90: changed definition of EPS
+	*	simplex2D.f90: in ellipse added PI to angle for midpoint
+			of segment N -> 1

@@ -1,0 +1,20 @@
+2005-01-11:
+* add implementation of second integral class
+  (containing Heaviside-distribution)
+
+2005-01-07:
+* add some comments
+
+2004-12-07:
+* implement all entry functions
+* "clean up" (put some utility functions into an
+  external module)
+* add some comments
+
+2004-12-05:
+* check hyperbola
+
+2004-12-02:
+* check hyperbola,parabola,deg_lines
+* check ellipse, eliminate bug
+* straight line case could be optimized
